@@ -50,4 +50,7 @@ public class StorageService {
         combined.addAll(getProducts());
         return combined;
     }
+    public Optional<Product> getProductById(UUID id) {
+        return Optional.ofNullable(productStorage.get(id));
+    }
 }
