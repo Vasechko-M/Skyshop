@@ -7,6 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skypro.skyshop.model.article.Article;
+import org.skypro.skyshop.model.product.DiscountedProduct;
+import org.skypro.skyshop.model.product.FixPriceProduct;
 import org.skypro.skyshop.model.product.SimpleProduct;
 import org.skypro.skyshop.model.search.SearchResult;
 import org.skypro.skyshop.model.search.Searchable;
@@ -43,13 +45,6 @@ import static org.mockito.Mockito.*;
         @Test
         void search_NoObjectsInStorage_ReturnsEmpty() {
              when(storageService.getAllSearchables()).thenReturn(Collections.emptyList());
-//            Searchable someSearchableObject = mock(Searchable.class); для проверки что бы тест упал
-//
-//            when(someSearchableObject.getId()).thenReturn(UUID.randomUUID());
-//            when(someSearchableObject.getName()).thenReturn("Test Name");
-//            when(someSearchableObject.getContentType()).thenReturn("TestType");
-//            when(someSearchableObject.getSearchTerm()).thenReturn("java");
-//            when(storageService.getAllSearchables()).thenReturn(Collections.singletonList(someSearchableObject));
 
             Collection<SearchResult> results = searchService.search("java");
 
@@ -72,11 +67,9 @@ import static org.mockito.Mockito.*;
         @Test
         void search_MatchFound_ReturnsResults() {
             List<Searchable> items = List.of(article1, product1);
-           // List<Searchable> items = List.of(product1); для проверки что бы тест упал
             when(storageService.getAllSearchables()).thenReturn(items);
 
             Collection<SearchResult> results = searchService.search("java");
-            //Collection<SearchResult> results = searchService.search("Велосипед"); для проверки что бы тест упал, с нижним сообщением
 
             assertFalse(results.isEmpty(), "Результат поиска не должен быть пустым, т.к. есть совпадение");
             assertTrue(results.stream().anyMatch(r -> r.getName().equals(article1.getName())),
@@ -88,7 +81,6 @@ import static org.mockito.Mockito.*;
         @Test
         void getProductById_ProductExists_ReturnsProduct() {
             when(storageService.getProductById(product1.getId())).thenReturn(product1);
-            //when(storageService.getProductById(product1.getId())).thenReturn(null); тут пробую,что бы null вернулся вместо объекта
 
             Product result = storageService.getProductById(product1.getId());
 
@@ -122,6 +114,39 @@ import static org.mockito.Mockito.*;
                     "Результат с верхним регистром содержит искомое");
             assertTrue(resultsMixed.stream().anyMatch(r -> r.getName().equals(article1.getName())),
                     "Результат со смешанным регистром содержит искомое");
+        }
+        @Test
+        void search_MultipleMatches_ReturnsAllMatchingResults() {
+            Article articleJava1 = new Article(UUID.randomUUID(), "Книга по Java", "Учебник по Java");
+            Article articleJava2 = new Article(UUID.randomUUID(), "Книга по Java обновления", "Учебник по Java с обновлениями");
+            Article articlePython = new Article(UUID.randomUUID(), "Python Guide", "Learn Python");
+            SimpleProduct productBike = new SimpleProduct(UUID.randomUUID(), "Велосипед", 1285);
+            DiscountedProduct productJavaBook = new DiscountedProduct(UUID.randomUUID(), "Java не для всех", 3000,18);
+            FixPriceProduct productSoap = new FixPriceProduct(UUID.randomUUID(), "Мыло для рук");
+
+            List<Searchable> items = List.of(
+                    articleJava1, articleJava2, articlePython,
+                    productBike, productJavaBook, productSoap
+            );
+
+            when(storageService.getAllSearchables()).thenReturn(items);
+
+            Collection<SearchResult> results = searchService.search("java");
+
+            assertFalse(results.isEmpty(), "Результат поиска не должен быть пустым");
+
+            Set<String> resultNames = new HashSet<>();
+            for (SearchResult r : results) {
+                resultNames.add(r.getName());
+            }
+
+            assertTrue(resultNames.contains(articleJava1.getName()), "Должен содержать " + articleJava1.getName());
+            assertTrue(resultNames.contains(articleJava2.getName()), "Должен содержать " + articleJava2.getName());
+            assertTrue(resultNames.contains(productJavaBook.getName()), "Должен содержать " + productJavaBook.getName());
+
+            assertFalse(resultNames.contains(articlePython.getName()), "Не должен содержать " + articlePython.getName());
+            assertFalse(resultNames.contains(productBike.getName()), "Не должен содержать " + productBike.getName());
+            assertFalse(resultNames.contains(productSoap.getName()), "Не должен содержать " + productSoap.getName());
         }
 
     }

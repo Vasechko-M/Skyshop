@@ -1,4 +1,4 @@
-package org.skypro.skyshop.controller;
+package org.skypro.skyshop.exception;
 
 import org.skypro.skyshop.exception.NoSuchProductException;
 import org.skypro.skyshop.exception.ShopError;
