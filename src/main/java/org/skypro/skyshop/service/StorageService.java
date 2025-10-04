@@ -54,10 +54,7 @@ public class StorageService {
         return combined;
     }
     public Product getProductById(UUID id) {
-        Product product = productStorage.get(id);
-        if (product == null) {
-            throw new NoSuchProductException("Продукт с id " + id + " не найден");
-        }
-        return product;
+        return Optional.ofNullable(productStorage.get(id))
+                .orElseThrow(() -> new NoSuchProductException("Продукт с id " + id + " не найден"));
     }
 }
