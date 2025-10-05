@@ -16,6 +16,20 @@ public class ProductBasket {
     public void addProduct(UUID id) {
         products.merge(id, 1, Integer::sum);
     }
+    public void removeProduct(UUID id) {
+        if (products.containsKey(id)) {
+            int count = products.get(id);
+            if (count > 1) {
+                products.put(id, count - 1);
+            } else {
+                products.remove(id);
+            }
+        }
+    }
+
+    public void clear() {
+        products.clear();
+    }
     public Map<UUID, Integer> getProducts() {
         return Collections.unmodifiableMap(products);
     }

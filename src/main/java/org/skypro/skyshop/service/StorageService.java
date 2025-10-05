@@ -27,13 +27,15 @@ public class StorageService {
         Stream.of(
                 new Article(UUID.randomUUID(), "Война и мир 1", "Школьная литература"),
                 new Article(UUID.randomUUID(), "Война и мир 2", "Книга для вечернего чтения"),
-                new Article(UUID.randomUUID(), "Книга по Java", "Учебник по Java")
+                new Article(UUID.randomUUID(), "Книга по Java", "Учебник по Java"),
+                new Article(UUID.randomUUID(), "Книга по Java обновления", "Учебник по Java с обновлениями")
         ).forEach(article -> articleStorage.put(article.getId(), article));
     }
     private void databaseProduct() {
         Stream.of(
                 new SimpleProduct(UUID.randomUUID(),"Велосипед", 1285),
                 new DiscountedProduct(UUID.randomUUID(),"Порошок зубной",30,18),
+                new DiscountedProduct(UUID.randomUUID(),"Java не для всех",3000,18),
                 new FixPriceProduct(UUID.randomUUID(),"Мыло для рук")
         ).forEach(product -> productStorage.put(product.getId(), product));
     }
@@ -52,10 +54,7 @@ public class StorageService {
         return combined;
     }
     public Product getProductById(UUID id) {
-        Product product = productStorage.get(id);
-        if (product == null) {
-            throw new NoSuchProductException("Продукт с id " + id + " не найден");
-        }
-        return product;
+        return Optional.ofNullable(productStorage.get(id))
+                .orElseThrow(() -> new NoSuchProductException("Продукт с id " + id + " не найден"));
     }
 }
